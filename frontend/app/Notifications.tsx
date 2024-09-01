@@ -4,12 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
 import Constants from "expo-constants";
-
-interface NotificationData {
-  date: number;
-  body: string;
-  data: any;
-}
+import { NotificationData } from "@/components/types";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -24,6 +19,7 @@ function handleRegistrationError(errorMessage: string) {
   throw new Error(errorMessage);
 }
 
+//returns the persistant expo push token string
 async function registerForPushNotificationsAsync() {
   if (Platform.OS === "android") {
     Notifications.setNotificationChannelAsync("default", {
@@ -118,6 +114,9 @@ export default function NotificationsPage() {
   useEffect(() => {
     async function saveNotification() {
       if (notification) {
+        // Remove page from data as not required for display
+        if (notification.request.content.data?.page)
+          delete notification.request.content.data.page;
         const newNotification: NotificationData = {
           date: notification.date,
           body: notification.request.content.body ?? "",
@@ -125,9 +124,10 @@ export default function NotificationsPage() {
         };
         await AsyncStorage.setItem(
           "notifications",
-          JSON.stringify([...data, newNotification])
+          JSON.stringify([newNotification, ...data])
         );
         setData([newNotification, ...data]);
+        setNotification(undefined);
       }
     }
     saveNotification();
