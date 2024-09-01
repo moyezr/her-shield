@@ -1,4 +1,4 @@
-import { Platform, StyleSheet, Text, View } from "react-native";
+import { Platform, Text, View } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useRef, useState } from "react";
 import * as Device from "expo-device";
@@ -134,12 +134,12 @@ export default function NotificationsPage() {
   }, [notification]);
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 items-center justify-center">
       <Text>Expo Push Token: {token}</Text>
       <View>
         {data.map((notification, index) => {
           return (
-            <View key={index} style={styles.card}>
+            <View key={index} className="m-5 border rounded-md p-2">
               <Text>{new Date(notification.date).toISOString()}</Text>
               <Text>{notification.body}</Text>
               <Text>{JSON.stringify(notification.data)}</Text>
@@ -151,16 +151,3 @@ export default function NotificationsPage() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  card: {
-    margin: 5,
-    borderWidth: 1,
-    padding: 2,
-  },
-});
