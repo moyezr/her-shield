@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { Button, Text, View } from "react-native";
 import { Audio } from "expo-av";
 import { RecordingStatus } from "expo-av/build/Audio";
-import * as TaskManager from 'expo-task-manager';
-import * as BackgroundFetch from 'expo-background-fetch';
-import { activateKeepAwake, deactivateKeepAwake } from 'expo-keep-awake';
+import * as TaskManager from "expo-task-manager";
+import * as BackgroundFetch from "expo-background-fetch";
+import { activateKeepAwake, deactivateKeepAwake } from "expo-keep-awake";
+import { Link } from "expo-router";
 
-const BACKGROUND_RECORDING_TASK = 'BACKGROUND_RECORDING_TASK';
+const BACKGROUND_RECORDING_TASK = "BACKGROUND_RECORDING_TASK";
 export default function Index() {
   const [recording, setRecording] = useState<any | undefined>();
   const [permissionResponse, requestPermission] = Audio.usePermissions();
@@ -28,9 +29,9 @@ export default function Index() {
         stopOnTerminate: false,
         startOnBoot: true,
       });
-      console.log('Task registered');
+      console.log("Task registered");
     } catch (err) {
-      console.log('Task Register failed:', err);
+      console.log("Task Register failed:", err);
     }
   };
 
@@ -58,7 +59,7 @@ export default function Index() {
       recording.setOnRecordingStatusUpdate((status: RecordingStatus) => {
         if (status.isRecording) {
           const { durationMillis, metering = -100 } = status;
-          console.log("Recording duration", durationMillis)
+          console.log("Recording duration", durationMillis);
         }
       });
       console.log("Recording started");
@@ -85,7 +86,7 @@ export default function Index() {
   async function playSound() {
     console.log("Loading Sound");
     const { sound } = await Audio.Sound.createAsync({
-      uri: recordingUri!
+      uri: recordingUri!,
     });
 
     console.log("Playing Sound");
@@ -107,6 +108,8 @@ export default function Index() {
       />
 
       {recordingUri && <Button title="Play Sound" onPress={playSound} />}
+
+      <Link href={{ pathname: "/Notifications" }}>Go to Notifications</Link>
     </View>
   );
 }
