@@ -14,7 +14,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "infoPlist" : {
+      "infoPlist": {
         "UIBackgroundModes": [
           "audio"
         ]
@@ -24,7 +24,13 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.buildaime.hershield",
+      "googleServicesFile": "./google-services.json",
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -42,6 +48,15 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "471d8dc8-d0ba-4070-b658-566c0e0b2a41"
+      }
+    },
+    "owner": "mdev5665"
   }
 }
