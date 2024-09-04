@@ -5,8 +5,7 @@ export default function RootLayout() {
   useNotificationObserver();
   return (
     <Stack>
-      <Stack.Screen name="index" />
-      <Stack.Screen name="Notifications" />
+      <Stack.Screen name="login" />
     </Stack>
   );
 }
