@@ -12,3 +12,35 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+
+model User {
+  id Int @id @default(autoincrement())
+  phoneNo String @unique @db.VarChar(10)
+  password String
+  name String
+  expoPushToken String?
+  createdAt DateTime @default(now())
+  contactsFromUser Contact[] @relation("fromUser")
+  contactsToUser Contact[] @relation("toUser")
+  sos Sos[]
+}
+
+model Contact {
+  id Int @id @default(autoincrement())
+  fromId Int
+  toId Int
+  toName String
+  fromUser User @relation("fromUser", fields: [fromId], references: [id])
+  toUser User @relation("toUser", fields: [toId], references: [id])
+}
+
+model Sos {
+  id Int @id @default(autoincrement())
+  fromId Int
+  user User @relation(fields: [fromId], references: [id])
+  location String
+  priority Int
+  audioUrl String?
+  createdAt DateTime @default(now())
+}

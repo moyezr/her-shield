@@ -1,0 +1,13 @@
+services:
+  db:
+    container_name: her-shield-db
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: her-shield
+    volumes:
+      - hs-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  hs-data:

@@ -3,5 +3,9 @@ interface NotificationData {
   body: string;
   data: any;
 }
+interface User {
+  id: number;
+  name: string;
+}
 
-export { NotificationData };
+export { NotificationData, User };

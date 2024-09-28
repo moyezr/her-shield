@@ -2,16 +2,24 @@ import { useEffect, useState } from "react";
 import { Button, Text, TouchableOpacity, View } from "react-native";
 import { Audio } from "expo-av";
 import { RecordingStatus } from "expo-av/build/Audio";
-import { Link } from "expo-router";
 import { CUSTOM_REC_QUALITY } from "@/components/extras";
 import MachineLearning from "@/components/ml/tf";
+import { User } from "@/components/types";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Index() {
   const [recording, setRecording] = useState<any | undefined>();
   const [permissionResponse, requestPermission] = Audio.usePermissions();
   const [recordingUri, setRecordingUri] = useState<string | null>(null);
-
+  const [user, setUser] = useState<User>();
   useEffect(() => {
+    const getUser = async () => {
+      const user = await AsyncStorage.getItem("user");
+      if (user) {
+        setUser(JSON.parse(user));
+      }
+    };
+    getUser();
     return () => {
       if (recording) {
         stopRecording();
@@ -75,20 +83,39 @@ export default function Index() {
   }
 
   return (
-    <View className="flex flex-col flex-1 px-8 justify-center">
-      <Text>Main User</Text>
-      <Button
-        title={recording ? "Stop Recording" : "Start Recording"}
-        onPress={recording ? stopRecording : startRecording}
-      />
+    <View className="flex flex-1 px-8 gap-4 mt-2">
+      <Text className="text-center font-semibold text-2xl">
+        {"Welcome, " + user?.name}
+      </Text>
+      <View className="rounded-md border p-3 px-5 flex gap-y-2">
+        <TouchableOpacity
+          onPress={recording ? stopRecording : startRecording}
+          className="p-2 rounded-md bg-blue-400 w-full"
+        >
+          <Text className="mx-auto text-white text-base">
+            {recording ? "Stop Recording" : "Start Recording"}
+          </Text>
+        </TouchableOpacity>
 
-      {recordingUri && <Button title="Play Sound" onPress={playSound} />}
-      {recordingUri && <MachineLearning lastRecordedUri={recordingUri} />}
-
-      <Link href={{ pathname: "/Notifications" }}>Go to Notifications</Link>
-      <TouchableOpacity className="p-4 px-8 bg-red-500 my-10 rounded-full mx-auto">
-        <Text className="text-xl font-medium">{"Send\nSOS"}</Text>
-      </TouchableOpacity>
+        {recordingUri ? (
+          <TouchableOpacity
+            onPress={playSound}
+            className="p-2 rounded-md bg-blue-400 w-full"
+          >
+            <Text className="mx-auto text-white text-base">Play Sound</Text>
+          </TouchableOpacity>
+        ) : null}
+        {recordingUri ? (
+          <MachineLearning lastRecordedUri={recordingUri} />
+        ) : null}
+      </View>
+      <View>
+        <TouchableOpacity className="p-4 px-8 bg-red-500 my-10 rounded-full mx-auto">
+          <Text className="text-xl text-center font-medium tracking-widest">
+            {"Send\nSOS!"}
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }

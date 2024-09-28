@@ -4,22 +4,27 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "tsc-watch --onSuccess \"node dist/src/index.js\"",
+    "dev": "dotenv -e .env -- tsc-watch --onSuccess \"node dist/src/index.js\"",
     "build": "tsc",
-    "start": "node dist/src/index.js"
+    "start": "dotenv -e .env -- node dist/src/index.js"
   },
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
     "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^22.5.1",
+    "dotenv-cli": "^7.4.2",
     "prisma": "^5.19.0",
     "tsc-watch": "^6.2.0",
     "typescript": "^5.5.4"
   },
   "dependencies": {
     "@prisma/client": "^5.19.0",
-    "express": "^4.19.2"
+    "bcrypt": "^5.1.1",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2"
   }
 }

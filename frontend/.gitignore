@@ -1,4 +1,7 @@
+## Uncomment below lines during development
 google-services.json
+.env
+##
 *.apk
 node_modules/
 .expo/

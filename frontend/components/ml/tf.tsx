@@ -1,6 +1,6 @@
 import * as tf from "@tensorflow/tfjs";
 import "@tensorflow/tfjs-react-native";
-import { Button, Text, View } from "react-native";
+import { Button, Text, TouchableOpacity, View } from "react-native";
 import * as FileSystem from "expo-file-system";
 import {
   FFmpegKit,
@@ -48,7 +48,7 @@ const convertAudioToFloat32Array = async (audioPath: string) => {
     }Audio/output-${Date.now()}.wav`; // Temporary path for the WAV file
 
     // Run FFmpeg command to convert AAC to WAV
-    const command = `-i ${audioPath} -f wav ${outputPath}`;
+    const command = `-i ${audioPath} -ar 16000 -f wav ${outputPath}`;
     const result = await FFmpegKit.execute(command);
     console.log("FFmpeg result:", result);
     if (ReturnCode.isSuccess(await result.getReturnCode())) {
@@ -66,21 +66,20 @@ const convertAudioToFloat32Array = async (audioPath: string) => {
   }
 };
 
-async function yamnet(lastRecordedUri: string) {
+async function yamnet(lastRecordedUri: string, setStatus: any) {
   console.log("YAMNet", lastRecordedUri, yamnetModel.model);
   const modelUrl = "https://www.kaggle.com/models/google/yamnet/TfJs/tfjs/1";
   console.log("Loading model..");
   if (!yamnetModel.model) {
     yamnetModel.model = await tf.loadGraphModel(modelUrl, { fromTFHub: true });
   }
-
+  setStatus("CALCULATING");
   try {
     const waveform = await convertAudioToFloat32Array(lastRecordedUri);
     if (!waveform) return;
     // @ts-ignore
     const [scores] = yamnetModel.model.predict(waveform);
-    const classIds = scores.mean(0).topk(5).indices.dataSync();
-    console.log(classIds);
+    const classIds = scores.mean(0).topk(5).indices.arraySync();
     return classIds;
   } catch (error) {
     console.error("Error in prediction:", error);
@@ -93,35 +92,54 @@ export default function MachineLearning({
   lastRecordedUri: string;
 }) {
   const [classIds, setClassIds] = useState<string[]>([]);
+  const [status, setStatus] = useState<
+    "DONE" | "LOADING" | "CALCULATING" | undefined
+  >();
 
   async function init() {
+    setStatus("LOADING");
     await tf.ready();
     if (lastRecordedUri.startsWith("file:///")) {
-      const res = await yamnet(lastRecordedUri);
-      const resString = JSON.stringify(res);
-
-      const parsedRes = JSON.parse(resString);
-      console.log("Class IDs:", parsedRes);
+      const res = await yamnet(lastRecordedUri, setStatus);
       const myArray: string[] = [];
-      for (let v of Object.values(parsedRes)) {
+      for (let v of res) {
         // @ts-ignore
         myArray.push(yamnetClassNames[v]);
       }
       console.log("My Array:", myArray);
       setClassIds(myArray);
+      setStatus("DONE");
     }
   }
 
   return (
     <>
-      <Button title="Machine Learning" onPress={init} />
-      <View className="m-8 p-2 justify-center flex flex-row gap-2 flex-wrap">
-        {classIds.map((name, index) => (
-          <Text className="p-2 bg-sky-400 border rounded-md" key={index}>
-            {name}
+      <TouchableOpacity
+        onPress={init}
+        disabled={status === "LOADING" || status === "CALCULATING"}
+        className="p-2 my-2 rounded-md bg-blue-400 w-full"
+      >
+        <Text className="mx-auto text-white text-base">
+          {`ANALYSE` + (status ? ", " + status : "")}
+        </Text>
+      </TouchableOpacity>
+      {classIds.length > 0 && (
+        <>
+          <Text className="text-center font-semibold text-lg">
+            Predictions:
           </Text>
-        ))}
-      </View>
+          <View className="m-2 p-2 justify-center flex flex-row gap-2 flex-wrap">
+            {classIds.map((name, index) => (
+              <Text
+                className="p-2 bg-sky-400 border rounded-md text-white"
+                key={index}
+              >
+                {name}
+              </Text>
+            ))}
+          </View>
+        </>
+      )}
     </>
   );
 }

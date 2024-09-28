@@ -1,6 +1,6 @@
 import * as tf from "@tensorflow/tfjs";
 
-let yamnetModel: { model: tf.GraphModel<string | tf.io.IOHandler> | null } = {
+const yamnetModel: { model: tf.GraphModel<string | tf.io.IOHandler> | null } = {
   model: null,
 };
 
