@@ -1,8 +1,9 @@
-import { Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import React, { useEffect, useState } from "react";
 import * as Contacts from "expo-contacts";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Logout from "@/components/Logout";
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 function useAlertedContacts(isRefetch: boolean) {
@@ -94,7 +95,7 @@ function DisplayAlertedContacts({
     }
   }
   return (
-    <View>
+    <View className="my-4">
       <Text className="text-base">Alerted Contacts</Text>
       <View className="gap-y-2">
         {alerted.map((contact, index) => (
@@ -181,27 +182,30 @@ export default function ContactsPage() {
   const [isRefetch, setIsRefetch] = useState(false);
   console.log("ContactsPage", isRefetch);
   return (
-    <View className="flex flex-1 justify-start gap-y-4 m-4">
-      <Text className="text-2xl font-bold mx-auto">Contacts</Text>
-      <DisplayAlertedContacts
-        isRefetch={isRefetch}
-        setIsRefetch={setIsRefetch}
-      />
-      <View>
-        {addContacts ? (
-          <DisplayAddableContacts
-            isRefetch={isRefetch}
-            setIsRefetch={setIsRefetch}
-          />
-        ) : (
-          <TouchableOpacity
-            className="bg-sky-500 p-2 rounded-md"
-            onPress={() => setAddContacts(true)}
-          >
-            <Text className="text-white mx-auto">Add Contacts</Text>
-          </TouchableOpacity>
-        )}
+    <ScrollView>
+      <View className="flex flex-1 justify-start gap-y-4 m-4 mt-1">
+        <Text className="text-2xl font-bold mx-auto">Contacts</Text>
+        <DisplayAlertedContacts
+          isRefetch={isRefetch}
+          setIsRefetch={setIsRefetch}
+        />
+        <View>
+          {addContacts ? (
+            <DisplayAddableContacts
+              isRefetch={isRefetch}
+              setIsRefetch={setIsRefetch}
+            />
+          ) : (
+            <TouchableOpacity
+              className="bg-sky-500 p-2 rounded-md"
+              onPress={() => setAddContacts(true)}
+            >
+              <Text className="text-white mx-auto">Add Contacts</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
-    </View>
+      <Logout />
+    </ScrollView>
   );
 }

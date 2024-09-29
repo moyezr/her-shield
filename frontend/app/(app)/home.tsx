@@ -1,17 +1,37 @@
-import { useEffect, useState } from "react";
-import { Button, Text, TouchableOpacity, View } from "react-native";
+import {
+  createContext,
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useState,
+} from "react";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { Audio } from "expo-av";
 import { RecordingStatus } from "expo-av/build/Audio";
 import { CUSTOM_REC_QUALITY } from "@/components/extras";
 import MachineLearning from "@/components/ml/tf";
 import { User } from "@/components/types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import SendSOS from "@/components/SendSOS";
+import * as FileSystem from "expo-file-system";
+
+interface ForceSos {
+  force: boolean;
+  priority: "high" | "low" | undefined;
+}
+interface SOSContextType {
+  forceSos: ForceSos | undefined;
+  setForceSos: Dispatch<SetStateAction<ForceSos | undefined>>;
+}
+
+export const SOSContext = createContext<SOSContextType | undefined>(undefined);
 
 export default function Index() {
   const [recording, setRecording] = useState<any | undefined>();
   const [permissionResponse, requestPermission] = Audio.usePermissions();
   const [recordingUri, setRecordingUri] = useState<string | null>(null);
   const [user, setUser] = useState<User>();
+  const [forceSos, setForceSos] = useState<ForceSos>();
   useEffect(() => {
     const getUser = async () => {
       const user = await AsyncStorage.getItem("user");
@@ -33,6 +53,10 @@ export default function Index() {
       if (permissionResponse.status !== "granted") {
         console.log("Requesting permission..");
         await requestPermission();
+      }
+      if (recordingUri) {
+        setRecordingUri(null);
+        await FileSystem.deleteAsync(recordingUri);
       }
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: true,
@@ -83,39 +107,37 @@ export default function Index() {
   }
 
   return (
-    <View className="flex flex-1 px-8 gap-4 mt-2">
-      <Text className="text-center font-semibold text-2xl">
-        {"Welcome, " + user?.name}
-      </Text>
-      <View className="rounded-md border p-3 px-5 flex gap-y-2">
-        <TouchableOpacity
-          onPress={recording ? stopRecording : startRecording}
-          className="p-2 rounded-md bg-blue-400 w-full"
-        >
-          <Text className="mx-auto text-white text-base">
-            {recording ? "Stop Recording" : "Start Recording"}
+    <SOSContext.Provider value={{ forceSos, setForceSos }}>
+      <ScrollView>
+        <View className="flex flex-1 px-8 gap-4 mt-2">
+          <Text className="text-center font-semibold text-2xl">
+            {"Welcome, " + user?.name}
           </Text>
-        </TouchableOpacity>
+          <View className="rounded-md border p-3 px-5 flex gap-y-2">
+            <TouchableOpacity
+              onPress={recording ? stopRecording : startRecording}
+              className="p-2 rounded-md bg-blue-400 w-full"
+            >
+              <Text className="mx-auto text-white text-base">
+                {recording ? "Stop Recording" : "Start Recording"}
+              </Text>
+            </TouchableOpacity>
 
-        {recordingUri ? (
-          <TouchableOpacity
-            onPress={playSound}
-            className="p-2 rounded-md bg-blue-400 w-full"
-          >
-            <Text className="mx-auto text-white text-base">Play Sound</Text>
-          </TouchableOpacity>
-        ) : null}
-        {recordingUri ? (
-          <MachineLearning lastRecordedUri={recordingUri} />
-        ) : null}
-      </View>
-      <View>
-        <TouchableOpacity className="p-4 px-8 bg-red-500 my-10 rounded-full mx-auto">
-          <Text className="text-xl text-center font-medium tracking-widest">
-            {"Send\nSOS!"}
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+            {recordingUri ? (
+              <TouchableOpacity
+                onPress={playSound}
+                className="p-2 rounded-md bg-blue-400 w-full"
+              >
+                <Text className="mx-auto text-white text-base">Play Sound</Text>
+              </TouchableOpacity>
+            ) : null}
+            {recordingUri ? (
+              <MachineLearning lastRecordedUri={recordingUri} />
+            ) : null}
+          </View>
+          <SendSOS lastRecordedUri={recordingUri} />
+        </View>
+      </ScrollView>
+    </SOSContext.Provider>
   );
 }

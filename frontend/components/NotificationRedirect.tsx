@@ -25,7 +25,7 @@ function useNotificationObserver() {
 
     const subscription = Notifications.addNotificationResponseReceivedListener(
       (response) => {
-        console.log("notification received", response);
+        // console.log("notification received", response);
         redirect(response.notification);
       }
     );

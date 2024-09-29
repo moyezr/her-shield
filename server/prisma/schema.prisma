@@ -40,7 +40,13 @@ model Sos {
   fromId Int
   user User @relation(fields: [fromId], references: [id])
   location String
-  priority Int
+  priority PriorityEnum
   audioUrl String?
   createdAt DateTime @default(now())
+}
+
+enum PriorityEnum{
+  LOW
+  MEDIUM
+  HIGH
 }

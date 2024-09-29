@@ -8,6 +8,7 @@ export default function RootLayout() {
       initialRouteName="(app)/home"
       screenOptions={{
         headerTitle: "HerShield",
+        statusBarColor: "black",
       }}
     >
       <Stack.Screen

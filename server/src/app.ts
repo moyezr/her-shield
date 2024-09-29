@@ -2,10 +2,10 @@ import express, { NextFunction, Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 import { hash, compare } from "bcrypt";
 import { JwtPayload, sign, verify } from "jsonwebtoken";
-import { connect } from "http2";
+import sosRouter from "./sos";
 
 const app = express();
-const prisma = new PrismaClient();
+export const prisma = new PrismaClient();
 
 function Authenticate(req: Request, res: Response, next: NextFunction) {
   const token = req.headers.authorization?.split(" ")[1];
@@ -20,16 +20,13 @@ function Authenticate(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-app.use(express.json());
+app.use(express.json({ limit: "50mb" }));
 
 app.get("/", (_, res) => {
   res.send("Her Shield API");
 });
 
 app.get("/health", (_, res) => {
-  res.send("API is healthy");
-});
-app.post("/health", (_, res) => {
   res.send("API is healthy");
 });
 
@@ -206,7 +203,6 @@ app.post("/user/contacts/remove", Authenticate, async (req, res) => {
         id: true,
       },
     });
-    console.log(toUser, phoneNo);
     if (!toUser) return res.status(400).json({ message: "User not found" });
     await prisma.contact.deleteMany({
       where: {
@@ -220,5 +216,7 @@ app.post("/user/contacts/remove", Authenticate, async (req, res) => {
     res.status(500).json({ message: "Request Failed" });
   }
 });
+
+app.use("/user/sos", Authenticate, sosRouter);
 
 export default app;

@@ -13,17 +13,19 @@ export default function Signin() {
     if (phone === "" || password === "") return;
     try {
       const response = await axios.post(`${API_URL}/auth/signin`, {
-        phoneNo: Number(phone),
+        phoneNo: phone,
         password,
       });
       await AsyncStorage.setItem("loggedIn", response.data.token);
       await AsyncStorage.setItem("user", JSON.stringify(response.data.user));
+      await AsyncStorage.removeItem("notifications");
       router.replace("/(app)/home");
     } catch (error) {
       console.log(error);
       if (axios.isAxiosError(error)) {
         Alert.alert("Sign in Error", error.response?.data.message);
-        console.error(error);
+      } else {
+        Alert.alert("Sign in Error", "Something went wrong");
       }
     }
   }
@@ -58,6 +60,7 @@ export default function Signin() {
       <Text onPress={() => router.push("/signup")} className="mx-auto">
         {"Don't have an account? Sign up"}
       </Text>
+      {/* <Text>{"API URL " + API_URL}</Text> */}
     </View>
   );
 }

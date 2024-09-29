@@ -1,15 +1,16 @@
 import * as tf from "@tensorflow/tfjs";
 import "@tensorflow/tfjs-react-native";
-import { Button, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import * as FileSystem from "expo-file-system";
 import {
   FFmpegKit,
   FFmpegKitConfig,
   ReturnCode,
 } from "ffmpeg-kit-react-native";
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import yamnetClassNames from "../yamnet_classes";
 import { yamnetModel } from "../Singleton";
+import { SOSContext } from "@/app/(app)/home";
 
 async function init() {
   console.log("Initializing FFmpeg..");
@@ -80,6 +81,7 @@ async function yamnet(lastRecordedUri: string, setStatus: any) {
     // @ts-ignore
     const [scores] = yamnetModel.model.predict(waveform);
     const classIds = scores.mean(0).topk(5).indices.arraySync();
+    tf.dispose([waveform, scores]);
     return classIds;
   } catch (error) {
     console.error("Error in prediction:", error);
@@ -95,7 +97,8 @@ export default function MachineLearning({
   const [status, setStatus] = useState<
     "DONE" | "LOADING" | "CALCULATING" | undefined
   >();
-
+  const [isScream, setIsScream] = useState(0);
+  const sos = useContext(SOSContext);
   async function init() {
     setStatus("LOADING");
     await tf.ready();
@@ -109,8 +112,19 @@ export default function MachineLearning({
       console.log("My Array:", myArray);
       setClassIds(myArray);
       setStatus("DONE");
+      setIsScream(Math.random());
     }
   }
+
+  useEffect(() => {
+    if (isScream) {
+      sos?.setForceSos({
+        force: isScream >= 0.3,
+        priority:
+          isScream >= 0.3 ? (isScream >= 0.6 ? "high" : "low") : undefined,
+      });
+    }
+  }, [isScream]);
 
   return (
     <>
@@ -128,7 +142,7 @@ export default function MachineLearning({
           <Text className="text-center font-semibold text-lg">
             Predictions:
           </Text>
-          <View className="m-2 p-2 justify-center flex flex-row gap-2 flex-wrap">
+          <View className="m-2 p-2flex flex-row gap-2 flex-wrap">
             {classIds.map((name, index) => (
               <Text
                 className="p-2 bg-sky-400 border rounded-md text-white"
@@ -137,6 +151,11 @@ export default function MachineLearning({
                 {name}
               </Text>
             ))}
+            {isScream >= 0.3 && (
+              <Text className="p-2 bg-green-500 border rounded-md text-white">
+                Screaming
+              </Text>
+            )}
           </View>
         </>
       )}

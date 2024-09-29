@@ -22,6 +22,7 @@ export default function Signup() {
       });
       await AsyncStorage.setItem("loggedIn", response.data.token);
       await AsyncStorage.setItem("user", JSON.stringify(response.data.user));
+      await AsyncStorage.removeItem("notifications");
       router.replace("/(app)/home");
     } catch (error) {
       if (axios.isAxiosError(error)) {

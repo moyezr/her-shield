@@ -5,8 +5,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "dotenv -e .env -- tsc-watch --onSuccess \"node dist/src/index.js\"",
-    "build": "tsc",
-    "start": "dotenv -e .env -- node dist/src/index.js"
+    "build": "prisma generate && tsc",
+    "start": "dotenv -e .env -- node dist/src/index.js",
+    "postinstall": "prisma generate"
   },
   "author": "",
   "license": "ISC",
@@ -22,8 +23,10 @@
     "typescript": "^5.5.4"
   },
   "dependencies": {
+    "@azure/storage-blob": "^12.25.0",
     "@prisma/client": "^5.19.0",
     "bcrypt": "^5.1.1",
+    "expo-server-sdk": "^3.11.0",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2"
   }

@@ -50,4 +50,6 @@ ext { ffmpegKitPackage = "full" }
 // @generated end ffmpeg-kit-react-native-package// @generated begin expo-camera-import - expo prebuild (DO NOT MODIFY) sync-f244f4f3d8bf7229102e8f992b525b8602c74770
 def expoCameraMavenPath = new File(["node", "--print", "require.resolve('expo-camera/package.json')"].execute(null, rootDir).text.trim(), "../android/maven")
 allprojects { repositories { maven { url(expoCameraMavenPath) } } }
-// @generated end expo-camera-import
+// @generated end expo-camera-import// @generated begin ffmpeg-kit-react-native-package - expo prebuild (DO NOT MODIFY) sync-3b8d11d4e8997d057de071186791fc7f80bca1c5
+ext { ffmpegKitPackage = "audio" }
+// @generated end ffmpeg-kit-react-native-package
